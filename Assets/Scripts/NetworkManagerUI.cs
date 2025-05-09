@@ -1,16 +1,20 @@
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class NetworkManagerUI : MonoBehaviour
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        
-    }
+    [SerializeField] private Button hostButton;
+    [SerializeField] private Button clientButton;
 
-    // Update is called once per frame
-    void Update()
+    private void Awake()
     {
-        
+        hostButton.onClick.AddListener(() => {
+            NetworkManager.Singleton.StartHost();
+        });
+        clientButton.onClick.AddListener(() =>
+        {
+            NetworkManager.Singleton.StartClient();
+        });
     }
 }

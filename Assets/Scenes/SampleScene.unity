@@ -707,7 +707,7 @@ GameObject:
   - component: {fileID: 384109211}
   - component: {fileID: 384109210}
   m_Layer: 5
-  m_Name: Text (Legacy)
+  m_Name: ClientBtnText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -765,7 +765,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Button
+  m_Text: CLIENT
 --- !u!222 &384109211
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1651,6 +1651,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1152169341}
   - component: {fileID: 1152169340}
+  - component: {fileID: 1152169342}
   m_Layer: 0
   m_Name: '@NetworkManager'
   m_TagString: Untagged
@@ -1673,7 +1674,7 @@ MonoBehaviour:
   NetworkManagerExpanded: 0
   NetworkConfig:
     ProtocolVersion: 0
-    NetworkTransport: {fileID: 0}
+    NetworkTransport: {fileID: 1152169342}
     PlayerPrefab: {fileID: 0}
     Prefabs:
       NetworkPrefabsLists:
@@ -1716,6 +1717,35 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1152169342
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1152169339}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6960e84d07fb87f47956e7a81d71c4e6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ProtocolType: 0
+  m_UseWebSockets: 0
+  m_UseEncryption: 0
+  m_MaxPacketQueueSize: 128
+  m_MaxPayloadSize: 6144
+  m_HeartbeatTimeoutMS: 500
+  m_ConnectTimeoutMS: 1000
+  m_MaxConnectAttempts: 60
+  m_DisconnectTimeoutMS: 30000
+  ConnectionData:
+    Address: 127.0.0.1
+    Port: 7777
+    ServerListenAddress: 127.0.0.1
+  DebugSimulator:
+    PacketDelayMS: 0
+    PacketJitterMS: 0
+    PacketDropRate: 0
 --- !u!1001 &1237326901
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1890,6 +1920,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1284576638}
+  - component: {fileID: 1284576639}
   - component: {fileID: 1284576637}
   m_Layer: 0
   m_Name: GameVisualManager
@@ -1910,6 +1941,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8a12e99b952d67448be50e173ea751a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  ShowTopMostFoldoutHeaderGroup: 1
   _crossMarkerPrefab: {fileID: 7534377601901676210, guid: 8ed9ef5450024f4458a0924a531045a3, type: 3}
   _circleMarkerPrefab: {fileID: 6247487719779442692, guid: 25a6cb5146b64e64ba4d4faeb318a446, type: 3}
 --- !u!4 &1284576638
@@ -1927,6 +1959,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1284576639
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1284576636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 3121779141
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1321809392
 GameObject:
   m_ObjectHideFlags: 0
@@ -2255,7 +2312,7 @@ GameObject:
   - component: {fileID: 1580934898}
   - component: {fileID: 1580934897}
   m_Layer: 5
-  m_Name: Button (Legacy)
+  m_Name: HostBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2527,6 +2584,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1646131374}
+  - component: {fileID: 1646131375}
   - component: {fileID: 1646131373}
   m_Layer: 0
   m_Name: '@GameManager'
@@ -2563,6 +2621,31 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1646131375
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1646131372}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 2995954569
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  DeferredDespawnTick: 0
+  Ownership: 1
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 0
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
+  SyncOwnerTransformWhenParented: 1
+  AllowOwnerToParent: 0
 --- !u!1 &1849453985
 GameObject:
   m_ObjectHideFlags: 0
@@ -2576,7 +2659,7 @@ GameObject:
   - component: {fileID: 1849453988}
   - component: {fileID: 1849453987}
   m_Layer: 5
-  m_Name: Button (Legacy) (1)
+  m_Name: ClientBtn
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2820,7 +2903,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1998220542
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2916,6 +2999,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c82b1dfb7fe7a00409cf9f03a3c5edd4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  hostButton: {fileID: 1580934897}
+  clientButton: {fileID: 1849453987}
 --- !u!1 &2034238389
 GameObject:
   m_ObjectHideFlags: 0
@@ -3003,7 +3088,7 @@ GameObject:
   - component: {fileID: 2061684941}
   - component: {fileID: 2061684940}
   m_Layer: 5
-  m_Name: Text (Legacy)
+  m_Name: HostBtnText
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3061,7 +3146,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Button
+  m_Text: HOST
 --- !u!222 &2061684941
 CanvasRenderer:
   m_ObjectHideFlags: 0

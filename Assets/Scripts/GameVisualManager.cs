@@ -1,12 +1,11 @@
-using Unity.Mathematics;
-using UnityEditor.Timeline.Actions;
+using Unity.Netcode;
 using UnityEngine;
 
 
 /// <summary>
 /// 보드의 상태를 애플리케이션에 출력한다.
 /// </summary>
-public class GameVisualManager : MonoBehaviour
+public class GameVisualManager : NetworkBehaviour
 {
     // 인스턴싱을 위한 프리팹 등록
     [SerializeField] private GameObject _crossMarkerPrefab;
@@ -14,10 +13,11 @@ public class GameVisualManager : MonoBehaviour
 
     private void Start()
     {
-        GameManager.Instance.OnBoardChanged += CreateMarker;
+        GameManager.Instance.OnBoardChanged += CreateMarkerRpc;
     }
 
-    private void CreateMarker(int _x, int _y, SquareState boardState)
+    [Rpc(SendTo.Server)]
+    private void CreateMarkerRpc(int _x, int _y, SquareState boardState)
     {
         switch (boardState)
         {

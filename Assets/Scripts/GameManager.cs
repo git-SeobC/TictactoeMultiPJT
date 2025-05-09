@@ -61,13 +61,9 @@ public class GameManager : NetworkBehaviour
 
     private void Start()
     {
-        //NetworkManager.Singleton.OnconnectionEvent += (networkManager, ConnenctionEventData) =>
-        {
 
-        };
     }
 
-    bool circleTurn = false;
     public void PlayMarker(int _x, int _y)
     {
         if (_gameOverState != GameOverState.NotOver)
