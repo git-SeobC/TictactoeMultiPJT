@@ -10,7 +10,26 @@ public class HUDUI : MonoBehaviour
         _circleIndicatorArrow.SetActive(false);
         _crossIndicatorArrow.SetActive(true);
         GameManager.Instance.OnTurnChanged += ChangeIndicator;
+        GameManager.Instance.OnGameStarted += GameManager_OnGameStarted;
     }
+
+
+    private void GameManager_OnGameStarted(object sender, System.EventArgs e)
+    {
+        //if (GameManager.Instance.GetLocalPlayerType() == SquareState.Cross)
+        //{
+        //    crossYouTextGameObject.SetActive(true);
+        //}
+        //else
+        //{
+        //    circleYouTextGameObject.SetActive(true);
+        //}
+        //playerCrossScoreTextMesh.text = "0";
+        //playerCircleScoreTextMesh.text = "0";
+
+        //UpdateCurrentArrow();
+    }
+
 
     private void ChangeIndicator(SquareState currentTurn)
     {

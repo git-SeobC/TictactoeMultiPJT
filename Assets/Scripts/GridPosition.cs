@@ -14,6 +14,6 @@ public class GridPosition : MonoBehaviour
 
         // _x와 _y를 GameManager에게 전달해야 한다.
         // 1. GameManager의 메소드를 호출하는 방식
-        GameManager.Instance.PlayMarker(_x, _y);
+        GameManager.Instance.PlayMarkerRpc(_x, _y, GameManager.Instance.GetLocalPlayerType());
     }
 }

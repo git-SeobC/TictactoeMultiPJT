@@ -19,13 +19,16 @@ public class GameVisualManager : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void CreateMarkerRpc(int _x, int _y, SquareState boardState)
     {
+        GameObject spawnObject;
         switch (boardState)
         {
             case SquareState.Cross:
-                Instantiate(_crossMarkerPrefab, GetWorldPositionFromCoordinate(_x, _y), Quaternion.identity);
+                spawnObject = Instantiate(_crossMarkerPrefab, GetWorldPositionFromCoordinate(_x, _y), Quaternion.identity);
+                spawnObject.GetComponent<NetworkObject>().Spawn(true);
                 break;
             case SquareState.Circle:
-                Instantiate(_circleMarkerPrefab, GetWorldPositionFromCoordinate(_x, _y), Quaternion.identity);
+                spawnObject = Instantiate(_circleMarkerPrefab, GetWorldPositionFromCoordinate(_x, _y), Quaternion.identity);
+                spawnObject.GetComponent<NetworkObject>().Spawn(true);
                 break;
             default:
                 Logger.Error($"잘못된 값이 입력되었습니다. {(int)boardState}");

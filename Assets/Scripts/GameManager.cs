@@ -5,6 +5,7 @@ using Unity.Mathematics;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
+using static Unity.Entities.Build.DotsGlobalSettings;
 
 
 /// <summary>
@@ -36,8 +37,10 @@ public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance { get; private set; }
 
+    private SquareState localPlayerType;
+    private NetworkVariable<SquareState> currentPlayablePlayerType = new NetworkVariable<SquareState>();
+
     private SquareState[,] _board = new SquareState[3, 3];
-    private SquareState _currentTurnState = SquareState.Cross;
     private GameOverState _gameOverState = GameOverState.NotOver;
 
     // 보드의 좌표, SquareState를 전달
@@ -45,6 +48,9 @@ public class GameManager : NetworkBehaviour
     // GameOverUI를 표현할 이벤트
     public event Action<GameOverState> OnGameEnded;
     public event Action<SquareState> OnTurnChanged;
+
+    public event EventHandler OnGameStarted;
+    public event EventHandler OnCurrentPlayablePlayerTypeChanged;
 
     private void Awake()
     {
@@ -59,26 +65,59 @@ public class GameManager : NetworkBehaviour
         }
     }
 
-    private void Start()
+    public override void OnNetworkSpawn()
     {
+        //Debug.Log("OnNetworkSpawn : " + NetworkManager.Singleton.LocalClientId);
+        if (NetworkManager.Singleton.LocalClientId == 0)
+        {
+            localPlayerType = SquareState.Cross;
+        }
+        else
+        {
+            localPlayerType = SquareState.Circle;
+        }
 
+        if (IsServer)
+        {
+            NetworkManager.Singleton.OnClientConnectedCallback += NetworkManager_OnClientConnectedCallback;
+        }
+
+        currentPlayablePlayerType.OnValueChanged += (SquareState oldPlayerType, SquareState newPlayerType) =>
+        {
+            OnCurrentPlayablePlayerTypeChanged?.Invoke(this, EventArgs.Empty);
+        };
     }
 
-    public void PlayMarker(int _x, int _y)
+    private void NetworkManager_OnClientConnectedCallback(ulong obj)
     {
-        if (_gameOverState != GameOverState.NotOver)
+        if (NetworkManager.Singleton.ConnectedClientsList.Count == 2)
         {
-            return;
+            // Start Game
+            currentPlayablePlayerType.Value = SquareState.Cross;
+            TriggerOnGameStartedRpc();
         }
+    }
+
+    [Rpc(SendTo.ClientsAndHost)]
+    private void TriggerOnGameStartedRpc()
+    {
+        OnGameStarted?.Invoke(this, EventArgs.Empty);
+    }
+
+    [Rpc(SendTo.Server)]
+    public void PlayMarkerRpc(int _x, int _y, SquareState playerType)
+    {
+        if (playerType != currentPlayablePlayerType.Value) return;
+        if (_gameOverState != GameOverState.NotOver) return;
         if (_board[_y, _x] != SquareState.None)
         {
             Logger.Info($"해당 위치에 두기 실패");
             return;
         }
 
-        _board[_y, _x] = _currentTurnState;
+        _board[_y, _x] = currentPlayablePlayerType.Value;
 
-        OnBoardChanged?.Invoke(_x, _y, _board[_y, _x]);
+        OnBoardChanged?.Invoke(_x, _y, playerType);
 
         _gameOverState = TestGameOver();
         if (_gameOverState != GameOverState.NotOver)
@@ -87,9 +126,18 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
-        if (_currentTurnState == SquareState.Cross) _currentTurnState = SquareState.Circle;
-        else _currentTurnState = SquareState.Cross;
-        OnTurnChanged?.Invoke(_currentTurnState);
+        switch (currentPlayablePlayerType.Value)
+        {
+            default:
+            case SquareState.Cross:
+                currentPlayablePlayerType.Value = SquareState.Circle;
+                break;
+            case SquareState.Circle:
+                currentPlayablePlayerType.Value = SquareState.Cross;
+                break;
+        }
+
+        OnTurnChanged?.Invoke(currentPlayablePlayerType.Value);
     }
 
 
@@ -211,5 +259,10 @@ public class GameManager : NetworkBehaviour
             return;
         }
         #endregion
+    }
+
+    public SquareState GetLocalPlayerType()
+    {
+        return localPlayerType;
     }
 }
