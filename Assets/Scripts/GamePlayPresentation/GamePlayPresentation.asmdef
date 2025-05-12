@@ -1,0 +1,19 @@
+{
+    "name": "GamePlayPresentation",
+    "rootNamespace": "",
+    "references": [
+        "GUID:c6fef3cbed2a55c44bd89c25f3b7f9d9",
+        "GUID:5147718f029dc3c459cbc37e1d165a36",
+        "GUID:1491147abca9d7d4bb7105af628b223e",
+        "GUID:6055be8ebefd69e48b49212b09b47b2f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

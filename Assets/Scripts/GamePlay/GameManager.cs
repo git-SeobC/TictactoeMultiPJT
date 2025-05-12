@@ -1,12 +1,6 @@
 using System;
-using System.Threading;
-using TMPro.EditorUtilities;
-using Unity.Mathematics;
 using Unity.Netcode;
-using Unity.VisualScripting;
-using UnityEngine;
-using static Unity.Entities.Build.DotsGlobalSettings;
-
+using Unity.VisualScripting.YamlDotNet.Serialization;
 
 /// <summary>
 /// 틱텍토 게임을 진행 -> 비즈니스 로직 담당 -> 핵심 묘듈
@@ -37,11 +31,13 @@ public class GameManager : NetworkBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    private SquareState localPlayerType;
+    // NetworkVariable는 읽기와 쓰기 권한이 있고 클라이언트는 읽기 권한만, 쓰기는 서버가 갖는다.
     private NetworkVariable<SquareState> currentPlayablePlayerType = new NetworkVariable<SquareState>();
+    private NetworkVariable<SquareState> _currentTurnState = new();
+    private SquareState _localPlayerType = SquareState.None; // 각 클라이언트 타입 구분
 
     private SquareState[,] _board = new SquareState[3, 3];
-    private GameOverState _gameOverState = GameOverState.NotOver;
+    private NetworkVariable<GameOverState> _gameOverState = new();
 
     // 보드의 좌표, SquareState를 전달
     public event Action<int, int, SquareState> OnBoardChanged;
@@ -65,16 +61,34 @@ public class GameManager : NetworkBehaviour
         }
     }
 
+    private void Start()
+    {
+        _currentTurnState.OnValueChanged += (previousState, newState) =>
+        {
+            OnTurnChanged?.Invoke(newState);
+            Logger.Info($"{previousState} => {newState}");
+        };
+
+        NetworkManager.Singleton.OnConnectionEvent += (networkManager, ConnectionEventData) =>
+        {
+            Logger.Info($"Client {ConnectionEventData.ClientId} {ConnectionEventData.EventType}");
+            if (networkManager.ConnectedClients.Count == 2)
+            {
+                StartGame();
+            }
+        };
+    }
+
     public override void OnNetworkSpawn()
     {
         //Debug.Log("OnNetworkSpawn : " + NetworkManager.Singleton.LocalClientId);
         if (NetworkManager.Singleton.LocalClientId == 0)
         {
-            localPlayerType = SquareState.Cross;
+            _localPlayerType = SquareState.Cross;
         }
         else
         {
-            localPlayerType = SquareState.Circle;
+            _localPlayerType = SquareState.Circle;
         }
 
         if (IsServer)
@@ -104,40 +118,95 @@ public class GameManager : NetworkBehaviour
         OnGameStarted?.Invoke(this, EventArgs.Empty);
     }
 
-    [Rpc(SendTo.Server)]
-    public void PlayMarkerRpc(int _x, int _y, SquareState playerType)
+
+    private bool CanPlayMarker(int x, int y, SquareState localPlayerType)
     {
-        if (playerType != currentPlayablePlayerType.Value) return;
-        if (_gameOverState != GameOverState.NotOver) return;
-        if (_board[_y, _x] != SquareState.None)
+        return _gameOverState.Value != GameOverState.NotOver &&
+            localPlayerType == _currentTurnState.Value &&
+            _board[y, x] == SquareState.None;
+    }
+
+    public void StartGame()
+    {
+        if (IsHost)
         {
-            Logger.Info($"해당 위치에 두기 실패");
+            _localPlayerType = SquareState.Cross;
+            _currentTurnState.Value = SquareState.Cross; // 주의! 현재 차례 상태를 바꾸는 쓰기 권한은 호스트만 가능하도록
+        }
+        else
+        {
+            _localPlayerType = SquareState.Circle;
+        }
+    }
+
+    // 서버에게 입력에 대해 요청하는 메소드
+    // 입력 : 좌표 값
+    // 출력 : X
+    [Rpc(SendTo.Server)]
+    public void ReqValidatePlayMarkerRpc(int x, int y, SquareState localPlayerType)
+    {
+        Logger.Info($"{nameof(ReqValidatePlayMarkerRpc)} {x}, {y}, {localPlayerType}");
+
+        if (CanPlayMarker(x, y, localPlayerType) == false)
+        {
             return;
         }
 
-        _board[_y, _x] = currentPlayablePlayerType.Value;
+        // 서버만 바뀜
+        OnBoardChanged?.Invoke(x, y, localPlayerType);
+        _board[y, x] = localPlayerType;
 
-        OnBoardChanged?.Invoke(_x, _y, playerType);
 
-        _gameOverState = TestGameOver();
-        if (_gameOverState != GameOverState.NotOver)
+        if (_currentTurnState.Value == SquareState.Cross)
         {
-            OnGameEnded?.Invoke(_gameOverState);
-            return;
+            _currentTurnState.Value = SquareState.Circle;
         }
-
-        switch (currentPlayablePlayerType.Value)
+        else if (_currentTurnState.Value == SquareState.Circle)
         {
-            default:
-            case SquareState.Cross:
-                currentPlayablePlayerType.Value = SquareState.Circle;
-                break;
-            case SquareState.Circle:
-                currentPlayablePlayerType.Value = SquareState.Cross;
-                break;
+            _currentTurnState.Value = SquareState.Cross;
         }
+    }
 
-        OnTurnChanged?.Invoke(currentPlayablePlayerType.Value);
+    //[Rpc(SendTo.Server)]
+    public void PlayMarkerRpc(int _x, int _y)
+    {
+        // 서버에게 입력이 유효한지 요청
+        if (CanPlayMarker(_x, _y, _localPlayerType))
+        {
+            ReqValidatePlayMarkerRpc(_x, _y, _localPlayerType);
+        }
+        else return;
+
+        //if (playerType != currentPlayablePlayerType.Value) return;
+        //if (_gameOverState != GameOverState.NotOver) return;
+        //if (_board[_y, _x] != SquareState.None)
+        //{
+        //    Logger.Info($"해당 위치에 두기 실패");
+        //    return;
+        //}
+
+        //_board[_y, _x] = currentPlayablePlayerType.Value;
+
+
+        //_gameOverState = TestGameOver();
+        //if (_gameOverState != GameOverState.NotOver)
+        //{
+        //    OnGameEnded?.Invoke(_gameOverState);
+        //    return;
+        //}
+
+        //switch (currentPlayablePlayerType.Value)
+        //{
+        //    default:
+        //    case SquareState.Cross:
+        //        currentPlayablePlayerType.Value = SquareState.Circle;
+        //        break;
+        //    case SquareState.Circle:
+        //        currentPlayablePlayerType.Value = SquareState.Cross;
+        //        break;
+        //}
+
+        //OnTurnChanged?.Invoke(currentPlayablePlayerType.Value);
     }
 
 
@@ -263,6 +332,6 @@ public class GameManager : NetworkBehaviour
 
     public SquareState GetLocalPlayerType()
     {
-        return localPlayerType;
+        return _localPlayerType;
     }
 }

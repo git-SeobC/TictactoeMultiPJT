@@ -8,11 +8,10 @@ public class HUDUI : MonoBehaviour
     void Start()
     {
         _circleIndicatorArrow.SetActive(false);
-        _crossIndicatorArrow.SetActive(true);
+        _crossIndicatorArrow.SetActive(false);
         GameManager.Instance.OnTurnChanged += ChangeIndicator;
-        GameManager.Instance.OnGameStarted += GameManager_OnGameStarted;
+        //GameManager.Instance.OnGameStarted += GameManager_OnGameStarted;
     }
-
 
     private void GameManager_OnGameStarted(object sender, System.EventArgs e)
     {
@@ -29,7 +28,6 @@ public class HUDUI : MonoBehaviour
 
         //UpdateCurrentArrow();
     }
-
 
     private void ChangeIndicator(SquareState currentTurn)
     {
